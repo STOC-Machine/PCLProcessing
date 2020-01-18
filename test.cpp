@@ -20,47 +20,36 @@ int main(int argc, char * argv[]) try
 
   pcl::PointCloud<pcl::PointXYZ> cloud;
 
-  // Fill in the cloud data
-  cloud.width    = 5;
-  cloud.height   = 1;
-  cloud.is_dense = false;
-  cloud.points.resize (cloud.width * cloud.height);
-
-  for (std::size_t i = 0; i < cloud.points.size (); ++i)
-  {
-    cloud.points[i].x = 1024 * rand () / (RAND_MAX + 1.0f);
-    cloud.points[i].y = 1024 * rand () / (RAND_MAX + 1.0f);
-    cloud.points[i].z = 1024 * rand () / (RAND_MAX + 1.0f);
-  }
-
-  pcl::io::savePCDFileASCII ("test_pcd.pcd", cloud);
-  std::cerr << "Saved " << cloud.points.size () << " data points to test_pcd.pcd." << std::endl;
-
-  for (std::size_t i = 0; i < cloud.points.size (); ++i)
-    std::cerr << "    " << cloud.points[i].x << " " << cloud.points[i].y << " " << cloud.points[i].z << std::endl;
-
-
-    while (1) // Application still alive?
-    {
         // Wait for the next set of frames from the camera
         auto frames = pipe.wait_for_frames();
-
-        auto color = frames.get_color_frame();
-
-        // For cameras that don't have RGB sensor, we'll map the pointcloud to infrared instead of color
-        if (!color)
-            color = frames.get_infrared_frame();
-
-        printf("String");
-
-        // Tell pointcloud object to map to this color frame
-        pc.map_to(color);
 
         auto depth = frames.get_depth_frame();
 
         // Generate the pointcloud and texture mappings
         points = pc.calculate(depth);
-    }
+        
+        auto vertices = points.get_vertices(); 
+        
+        // Fill in the cloud data
+  cloud.width    = points.size();
+  cloud.height   = 1;
+  cloud.is_dense = false;
+  cloud.points.resize (cloud.width * cloud.height);
+        
+        printf("%f, %f, %f, \n", vertices[0].x, vertices[0].y, vertices[0].z);
+        
+        for (std::size_t i = 0; i < cloud.points.size (); ++i)
+  {
+    cloud.points[i].x = vertices[i].x;
+    cloud.points[i].y = vertices[i].y;
+    cloud.points[i].z = vertices[i].z;
+  }
+  
+  pcl::io::savePCDFileASCII ("test_pcd.pcd", cloud);
+  std::cerr << "Saved " << cloud.points.size () << " data points to test_pcd.pcd." << std::endl;
+
+  //for (std::size_t i = 0; i < cloud.points.size (); ++i)
+  //  std::cerr << "    " << cloud.points[i].x << " " << cloud.points[i].y << " " << cloud.points[i].z << std::endl;
 
     return EXIT_SUCCESS;
 }
