@@ -38,14 +38,24 @@ int main(int argc, char * argv[]) try
         
         printf("%f, %f, %f, \n", vertices[0].x, vertices[0].y, vertices[0].z);
         
-        for (std::size_t i = 0; i < cloud.points.size (); ++i)
+  for (std::size_t i = 0; i < cloud.points.size (); ++i)
   {
-    cloud.points[i].x = vertices[i].x;
-    cloud.points[i].y = vertices[i].y;
-    cloud.points[i].z = vertices[i].z;
+    float x,y,z;
+    x=vertices[i].x;
+    y=vertices[i].y;
+    z=vertices[i].z;
+    if(sqrt(x*x+y*y+z*z)<1.0){
+        cloud.points[i].x = vertices[i].x;
+        cloud.points[i].y = vertices[i].y;
+        cloud.points[i].z = vertices[i].z;
+    }
+    else{
+        cloud.width -=1;
+        cloud.points.resize(cloud.width * cloud.height);
+    }
   }
   
-  pcl::io::savePCDFileASCII ("test_pcd.pcd", cloud);
+  pcl::io::savePCDFileASCII ("test_pcdrot.pcd", cloud);
   std::cerr << "Saved " << cloud.points.size () << " data points to test_pcd.pcd." << std::endl;
 
   //for (std::size_t i = 0; i < cloud.points.size (); ++i)
